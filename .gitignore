@@ -1,0 +1,62 @@
+# Python caches and environments
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Training artifacts and large experiment outputs
+checkponint/
+checkpoint/
+checkpoints/
+runs/
+outputs/
+result/
+fig/
+long_term_predictions/
+long_term_predictions_2/
+trajectory_samples/
+trajectory_visualizations/
+
+# Large binary data and model weights
+*.npy
+*.npz
+*.tar
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.xls
+*.xlsx
+*.pdf
+*.png
+*.log
+
+# Curated lightweight assets kept in the repository
+!data/
+!data/sample/
+!data/sample/*.npy
+!docs/
+!docs/**/*.csv
+!docs/**/*.md
+!docs/**/*.png
+
+# Legacy draft open-source placeholder
+open-source/
+
+# Root-level generated reports are copied into docs/reports for release
+/routing_analysis_report*.md
+/routing_top2_trained_report_zh.md
+
+# Local automation wrapper with machine-specific paths
+run_loss_sensitivity_top2.ps1
