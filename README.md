@@ -1,8 +1,28 @@
 # PreSimNet
 
-PreSimNet is a physics-encoded mixture-of-experts model for heterogeneous car-following trajectory prediction. The active implementation uses four interaction-type experts and supports Top-2 expert aggregation by selecting the two largest predicted routing probabilities and renormalizing them before dynamic prediction.
+PreSimNet is a synergistic physics-encoded deep learning framework for integrated prediction and simulation of car-following in mixed-autonomy traffic. The active implementation uses four interaction-type experts and supports Top-2 expert aggregation by selecting the two largest predicted routing probabilities and renormalizing them before dynamic prediction.
 
 This repository is cleaned for code release: full datasets, checkpoints, training logs, and large visualization dumps are excluded. A small `.npy` sample is included only to document the data schema and support smoke tests.
+
+## Overview
+
+Mixed-autonomy traffic contains both autonomous vehicles (AVs) and human-driven vehicles (HVs), making heterogeneous car-following dynamics difficult to model with a single behavior rule. PreSimNet addresses this by sharing a type-guided trajectory encoder across two coupled tasks: short-term open-loop trajectory prediction and closed-loop physics-based behavior simulation.
+
+The framework learns representations for four interaction types: `AV-AV`, `AV-HV`, `HV-AV`, and `HV-HV`. These features feed an open-loop prediction head for future position forecasting and a physics-encoded Mixture-of-Experts module that generates ACC/IDM-style dynamic parameters for iterative simulation.
+
+![Conceptual illustration of the PreSimNet framework](assets/graphical_abstract.png)
+
+## Framework
+
+PreSimNet bridges trajectory prediction and behavior simulation through three components:
+
+1. **Trajectory feature learning**: a shared Mamba/Transformer-based encoder extracts temporal features from historical trajectories and predicts the car-following interaction type.
+2. **Open-loop prediction**: a direct multi-step prediction head forecasts future positions from the shared representation.
+3. **Closed-loop simulation**: a physics-encoded MoE module predicts car-following model parameters and iteratively simulates future velocity and gap.
+
+Long-horizon rollouts in the original project assets illustrate why the closed-loop simulation head is useful: direct open-loop prediction can accumulate errors over extended horizons, while physics-guided simulation better preserves behavioral consistency.
+
+![Long-term stability comparison](assets/long_term_comparison.png)
 
 ## Repository Layout
 
@@ -13,6 +33,7 @@ This repository is cleaned for code release: full datasets, checkpoints, trainin
 - `speed_stratified_eval.py` and `loss_sensitivity_top2.py`: supplementary analysis scripts.
 - `train_baseline.py`, `evaluate_baseline.py`, and `model/*_baseline.py`: baseline model training and evaluation code.
 - `loader2.py`: dataset loader and column schema.
+- `assets/`: high-level framework and long-term comparison figures from the original repository README.
 - `data/sample/test_data_sample.npy`: 128-window example sample from the test set.
 - `docs/reports/`: project reports used as the source of the reported metrics.
 - `docs/results/top2_trained/`: CSV tables from the latest Top-2 full-test analysis.
