@@ -704,3 +704,7 @@ class MoEGRU(nn.Module):
         outputs = self.encoder(hist)
         
         return outputs
+
+
+class PreSimNet(Encoder):
+    pass

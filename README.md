@@ -4,7 +4,7 @@ Official code for **PreSimNet: A Synergistic Physics-Encoded Deep Learning Frame
 
 PreSimNet models heterogeneous car-following interactions in mixed-autonomy traffic by coupling short-term trajectory prediction with closed-loop physics-guided behavior simulation. The model learns type-guided features for four interaction settings: `AV-AV`, `AV-HV`, `HV-AV`, and `HV-HV`.
 
-![PreSimNet framework](assets/graphical_abstract.png)
+![PreSimNet framework](docs/figures/article/PreSimNet.png)
 
 ## Overview
 
@@ -16,8 +16,10 @@ PreSimNet uses a shared trajectory encoder to extract temporal features and infe
 
 ## Repository Layout
 
-- `model/model_MoE_gru_new.py`: main PreSimNet model.
+- `model/presimnet.py`: main PreSimNet model.
 - `model/model_*_baseline.py`: main baseline models used in the paper.
+- `checkpoints/presimnet_top2/epoch21_e.tar`: released PreSimNet Top-2 checkpoint.
+- `infer_presimnet.py`: inference entry point for `.npy` trajectory windows.
 - `train_moe_top2.py`: PreSimNet training entry point.
 - `train_baseline.py`: baseline training entry point with `--model` selection.
 - `evaluate_baseline.py`: baseline evaluation entry point.
@@ -25,7 +27,7 @@ PreSimNet uses a shared trajectory encoder to extract temporal features and infe
 - `evaluate_position_rmse.py`: direct position RMSE evaluation.
 - `loader2.py`: NumPy dataset loader and data schema.
 - `data/sample/test_data_sample.npy`: small example file for format checks.
-- `docs/figures/article/`: figures converted from the manuscript figure directory.
+- `docs/figures/article/PreSimNet.png`: framework figure used in this README.
 
 ## Results
 
@@ -52,10 +54,6 @@ The following tables summarize the paper-level metrics.
 | PILSTM-IDM (Joint) | 0.606 | 0.776 |
 | PIT-IDM (Joint) | 0.855 | 0.677 |
 | **PreSimNet** | **0.342** | **0.420** |
-
-![Long-term comparison](assets/long_term_comparison.png)
-
-More manuscript figures are available in [docs/figures/article](docs/figures/article).
 
 ## Data Format
 
@@ -88,6 +86,17 @@ pip install -r requirements.txt
 ```
 
 ## Smoke Test
+
+Run inference with the released checkpoint and sample data:
+
+```bash
+python infer_presimnet.py \
+  --data data/sample/test_data_sample.npy \
+  --checkpoint checkpoints/presimnet_top2/epoch21_e.tar \
+  --out outputs/sample_predictions.npz
+```
+
+Run a one-epoch training smoke test:
 
 ```bash
 python train_moe_top2.py \

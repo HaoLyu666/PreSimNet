@@ -43,14 +43,19 @@ trajectory_visualizations/
 *.png
 *.log
 
-# Curated lightweight assets kept in the repository
+# Released sample data, figures, and inference checkpoint
 !data/
 !data/sample/
 !data/sample/*.npy
 !docs/
-!docs/**/*.csv
-!docs/**/*.md
-!docs/**/*.png
+!docs/figures/
+!docs/figures/article/
+!docs/figures/article/PreSimNet.png
+!checkpoints/
+checkpoints/*
+!checkpoints/presimnet_top2/
+checkpoints/presimnet_top2/*
+!checkpoints/presimnet_top2/epoch21_e.tar
 
 # Legacy draft open-source placeholder
 open-source/
@@ -89,12 +94,10 @@ run_loss_sensitivity_top2.ps1
 /trajectory_visualization.py
 /visualize_mapping.py
 /visualize_trajectories.py
-/model/model_MoE_gru.py
-/model/model_MoE_gru_enhanced.py
-/model/model_MoE_gru_new_ab.py
-/model/model_MoE_gru_new_ablation.py
-/model/model_MoE_gru_new_pe.py
-/model/model_MoE_gru_new_pred.py
+/model/model_MoE_*.py
+/model/model_*_ab*.py
+/model/model_*_pe.py
+/model/model_*_pred.py
 /model/model_pip_baseline.py
 /module/mamba2_simple.py
 /module/ops/

@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 from config import args as base_args
-import model.model_MoE_gru_new as model
+import model.presimnet as model
 
 
 TYPE_LABELS = {

@@ -9,15 +9,10 @@ import torch as t
 from tqdm import tqdm
 
 from config import args as base_args
-import model.model_MoE_gru_new as model
+import model.presimnet as model
 
 
 CHECKPOINTS = {
-    "presimnet_soft_all": (
-        "checkpoints/"
-        "presimnet_soft_all/"
-        "epoch21_e.tar"
-    ),
     "presimnet_top2": (
         "checkpoints/"
         "presimnet_top2/"
@@ -30,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate direct position prediction RMSE.")
     parser.add_argument("--data", default="../data/test_data.npy")
     parser.add_argument("--batch-size", type=int, default=512)
-    parser.add_argument("--out", default="fig/vis/position_rmse_compare.csv")
+    parser.add_argument("--out", default="outputs/position_rmse_compare.csv")
     parser.add_argument("--device", default="cuda:0" if t.cuda.is_available() else "cpu")
     parser.add_argument("--drop-last", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--max-batches", type=int, default=None)

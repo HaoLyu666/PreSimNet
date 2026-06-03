@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 import loader2 as lo
-import model.model_MoE_gru_new as model
+import model.presimnet as model
 from config import args, device, learning_rate
 
 
