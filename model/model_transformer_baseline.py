@@ -181,6 +181,9 @@ class TransformerBaseline(nn.Module):
         }
 
 
+Seq2SeqBaseline = TransformerBaseline
+
+
 class predictor:
     def __init__(self, args):
         self.args = args

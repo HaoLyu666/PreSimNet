@@ -1,47 +1,65 @@
 # PreSimNet
 
-PreSimNet is a synergistic physics-encoded deep learning framework for integrated prediction and simulation of car-following in mixed-autonomy traffic. The active implementation uses four interaction-type experts and supports Top-2 expert aggregation by selecting the two largest predicted routing probabilities and renormalizing them before dynamic prediction.
+Official code for **PreSimNet: A Synergistic Physics-Encoded Deep Learning Framework for Integrated Prediction and Simulation of Car-Following in Mixed-Autonomy Traffic**.
 
-This repository is cleaned for code release: full datasets, checkpoints, training logs, and large visualization dumps are excluded. A small `.npy` sample is included only to document the data schema and support smoke tests.
+PreSimNet models heterogeneous car-following interactions in mixed-autonomy traffic by coupling short-term trajectory prediction with closed-loop physics-guided behavior simulation. The model learns type-guided features for four interaction settings: `AV-AV`, `AV-HV`, `HV-AV`, and `HV-HV`.
+
+![PreSimNet framework](assets/graphical_abstract.png)
 
 ## Overview
 
-Mixed-autonomy traffic contains both autonomous vehicles (AVs) and human-driven vehicles (HVs), making heterogeneous car-following dynamics difficult to model with a single behavior rule. PreSimNet addresses this by sharing a type-guided trajectory encoder across two coupled tasks: short-term open-loop trajectory prediction and closed-loop physics-based behavior simulation.
+PreSimNet uses a shared trajectory encoder to extract temporal features and infer the car-following interaction type. The shared representation feeds two complementary heads:
 
-The framework learns representations for four interaction types: `AV-AV`, `AV-HV`, `HV-AV`, and `HV-HV`. These features feed an open-loop prediction head for future position forecasting and a physics-encoded Mixture-of-Experts module that generates ACC/IDM-style dynamic parameters for iterative simulation.
-
-![Conceptual illustration of the PreSimNet framework](assets/graphical_abstract.png)
-
-## Framework
-
-PreSimNet bridges trajectory prediction and behavior simulation through three components:
-
-1. **Trajectory feature learning**: a shared Mamba/Transformer-based encoder extracts temporal features from historical trajectories and predicts the car-following interaction type.
-2. **Open-loop prediction**: a direct multi-step prediction head forecasts future positions from the shared representation.
-3. **Closed-loop simulation**: a physics-encoded MoE module predicts car-following model parameters and iteratively simulates future velocity and gap.
-
-Long-horizon rollouts in the original project assets illustrate why the closed-loop simulation head is useful: direct open-loop prediction can accumulate errors over extended horizons, while physics-guided simulation better preserves behavioral consistency.
-
-![Long-term stability comparison](assets/long_term_comparison.png)
+- **Open-loop prediction**: directly forecasts future following-vehicle positions for short-term trajectory prediction.
+- **Closed-loop simulation**: predicts parameters for physics-based car-following models and iteratively simulates future gap and velocity.
+- **Type-guided MoE routing**: aggregates interaction-specific experts, with Top-2 routing support in the released main model.
 
 ## Repository Layout
 
-- `train_moe_top2.py`: recommended Top-2 training entry point.
-- `model/model_MoE_gru_new.py`: active PreSimNet model. `predictor.route_probabilities` supports `soft_all`, `hard_top1`, and `top2`.
-- `analyze_routing_topk.py`: routing analysis and evaluation-style RMSE for hard Top-1, Top-2, and related subsets.
-- `evaluate_position_rmse.py`: direct position prediction RMSE comparison.
-- `speed_stratified_eval.py` and `loss_sensitivity_top2.py`: supplementary analysis scripts.
-- `train_baseline.py`, `evaluate_baseline.py`, and `model/*_baseline.py`: baseline model training and evaluation code.
-- `loader2.py`: dataset loader and column schema.
-- `assets/`: high-level framework and long-term comparison figures from the original repository README.
-- `data/sample/test_data_sample.npy`: 128-window example sample from the test set.
-- `docs/reports/`: project reports used as the source of the reported metrics.
-- `docs/results/top2_trained/`: CSV tables from the latest Top-2 full-test analysis.
-- `docs/figures/top2_trained/`: selected routing-analysis figures.
+- `model/model_MoE_gru_new.py`: main PreSimNet model.
+- `model/model_*_baseline.py`: main baseline models used in the paper.
+- `train_moe_top2.py`: PreSimNet training entry point.
+- `train_baseline.py`: baseline training entry point with `--model` selection.
+- `evaluate_baseline.py`: baseline evaluation entry point.
+- `analyze_routing_topk.py`: Top-2 routing analysis using the original batch-wise evaluation protocol.
+- `evaluate_position_rmse.py`: direct position RMSE evaluation.
+- `loader2.py`: NumPy dataset loader and data schema.
+- `data/sample/test_data_sample.npy`: small example file for format checks.
+- `docs/figures/article/`: figures converted from the manuscript figure directory.
+
+## Results
+
+The following tables summarize the paper-level metrics.
+
+### Trajectory Prediction And Type Classification
+
+| Model | Position RMSE (m) | Classification Accuracy (%) | #Params | Inference Time (ms/batch) |
+|---|---:|---:|---:|---:|
+| Seq2Seq | 0.304 | 97.12 | 185,413 | 2.4 |
+| Transformer | 0.295 | 98.62 | 246,085 | 2.9 |
+| CS-LSTM | 0.380 | 95.68 | 247,525 | 4.9 |
+| STDAN | 0.278 | 97.10 | 336,165 | 6.3 |
+| BAT | 0.272 | 98.39 | 417,605 | 5.1 |
+| HLTP | 0.280 | 98.96 | 527,882 | 7.4 |
+| **PreSimNet** | **0.258** | **99.23** | **247,621** | **2.7** |
+
+### Behavior Simulation
+
+| Model | Velocity RMSE (m/s) | Gap RMSE (m) |
+|---|---:|---:|
+| Personalized IDM | 0.359 | 1.352 |
+| PIDL-IDM (Joint) | 1.126 | 1.085 |
+| PILSTM-IDM (Joint) | 0.606 | 0.776 |
+| PIT-IDM (Joint) | 0.855 | 0.677 |
+| **PreSimNet** | **0.342** | **0.420** |
+
+![Long-term comparison](assets/long_term_comparison.png)
+
+More manuscript figures are available in [docs/figures/article](docs/figures/article).
 
 ## Data Format
 
-The full data files are NumPy arrays with shape `(N, 40, 13)`. Each sample contains 20 historical steps and 20 prediction steps. Column meanings are:
+Input files are NumPy arrays with shape `(N, 40, 13)`. Each sample contains 20 historical steps and 20 prediction steps.
 
 | Index | Meaning |
 |---:|---|
@@ -59,90 +77,81 @@ The full data files are NumPy arrays with shape `(N, 40, 13)`. Each sample conta
 | 11 | following vehicle position |
 | 12 | lead vehicle position |
 
-Interaction type ids follow the project reports: `0=AV-HV`, `1=AV-AV`, `2=HV-HV`, `3=HV-AV`.
+Interaction type ids are `0=AV-HV`, `1=AV-AV`, `2=HV-HV`, and `3=HV-AV`.
 
-## Setup
+## Installation
 
-Install a PyTorch build matching your CUDA environment, then install the remaining dependencies:
+Install a PyTorch build that matches your CUDA environment, then install the remaining dependencies:
 
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
-For this remote machine, GPU runs were validated in WSL with Python at `/home/codex/venvs/unipe/bin/python`.
-
 ## Smoke Test
 
-The included sample is not large enough for real training, but it is useful for checking imports, the loader, and a short forward/training loop:
-
-```powershell
-python train_moe_top2.py --train-data data/sample/test_data_sample.npy --epochs 1 --batch-size 16 --max-batches 2 --checkpoint-dir runs/sample/checkpoints --result-dir runs/sample/results
+```bash
+python train_moe_top2.py \
+  --train-data data/sample/test_data_sample.npy \
+  --epochs 1 \
+  --batch-size 16 \
+  --max-batches 2 \
+  --checkpoint-dir runs/sample/checkpoints \
+  --result-dir runs/sample/results
 ```
 
 ## Training
 
-Run Top-2 training on the full data:
+Train PreSimNet:
 
-```powershell
-python train_moe_top2.py --train-data ../data/train_data.npy --epochs 21 --batch-size 512 --num-workers 4 --gamma 0.9 --data-loading mmap
+```bash
+python train_moe_top2.py \
+  --train-data ../data/train_data.npy \
+  --epochs 21 \
+  --batch-size 512 \
+  --num-workers 4 \
+  --gamma 0.9
 ```
 
-The default output directories follow the project convention:
+Train a baseline:
 
-- checkpoints: `checkponint/ed64_inl20_ol20_drop0.1_tl1_nh4_od2_gama0.9_qv1_nt2_gru_new_2-top2/`
-- logs: `result/ed64_inl20_ol20_drop0.1_tl1_nh4_od2_gama0.9_qv1_nt2_gru_new_2-top2/`
+```bash
+python train_baseline.py \
+  --model hltp \
+  --train-data ../data/train_data.npy \
+  --test-data ../data/test_data.npy \
+  --epochs 21 \
+  --batch-size 512
+```
+
+Available baseline names are `seq2seq`, `transformer`, `cslstm`, `stdan`, `bat`, and `hltp`.
 
 ## Evaluation
 
-Latest Top-2 routing analysis:
+The evaluation scripts default to the paper's original batch-wise RMSE protocol with `batch_size=512` and `drop_last=True`.
 
-```powershell
-python analyze_routing_topk.py --checkpoint checkponint/ed64_inl20_ol20_drop0.1_tl1_nh4_od2_gama0.9_qv1_nt2_gru_new_2-top2/epoch21_e.tar --data ../data/test_data.npy --out-dir fig/vis/routing_top2_trained_full_test --batch-size 4096 --device cuda:0
+Top-2 routing analysis:
+
+```bash
+python analyze_routing_topk.py \
+  --checkpoint checkpoints/presimnet_top2/epoch21_e.tar \
+  --data ../data/test_data.npy \
+  --out-dir outputs/routing_top2
 ```
 
-Direct position RMSE comparison:
+Direct position RMSE:
 
-```powershell
-python evaluate_position_rmse.py --data ../data/test_data.npy --batch-size 4096 --device cuda:0
+```bash
+python evaluate_position_rmse.py \
+  --data ../data/test_data.npy \
+  --out outputs/position_rmse.csv
 ```
 
-## Latest Top-2 Metrics
+Baseline evaluation:
 
-The following metrics are taken from `docs/reports/top2_trained_report_zh.md`, which is the latest project report for the Top-2 full-test setting.
-
-Full test RMSE:
-
-| Routing | Gap 0.5s | Vel 0.5s | Gap 1.0s | Vel 1.0s | Gap 1.5s | Vel 1.5s | Gap 2.0s | Vel 2.0s | Gap Avg | Vel Avg |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Top-2 | 0.230759 | 0.266919 | 0.364927 | 0.307181 | 0.483280 | 0.361042 | 0.621276 | 0.452345 | 0.366770 | 0.310733 |
-
-Routing identification statistics:
-
-| Type | Samples | Hard Top-1 errors | Hard Top-1 error rate | Top-2 misses | Top-2 miss rate | Top-2 rescues | Rescue / hard error |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| AV-AV | 404,724 | 1,974 | 0.488% | 14 | 0.003% | 1,960 | 99.29% |
-| AV-HV | 552,061 | 8,059 | 1.460% | 93 | 0.017% | 7,966 | 98.85% |
-| HV-AV | 543,312 | 3,232 | 0.595% | 99 | 0.018% | 3,133 | 96.94% |
-| HV-HV | 746,842 | 7,554 | 1.011% | 186 | 0.025% | 7,368 | 97.54% |
-| ALL | 2,246,939 | 20,819 | 0.927% | 392 | 0.017% | 20,427 | 98.12% |
-
-Hard Top-1 error subset RMSE:
-
-| Routing | Samples | Gap Avg | Vel Avg | Gap 2.0s | Vel 2.0s |
-|---|---:|---:|---:|---:|---:|
-| Soft-all | 20,819 | 0.368523 | 0.217419 | 0.624424 | 0.410484 |
-| Hard Top-1 | 20,819 | 0.371285 | 0.221295 | 0.632007 | 0.416181 |
-| Top-2 | 20,819 | 0.368588 | 0.217547 | 0.624638 | 0.410693 |
-
-Direct position prediction RMSE:
-
-| Model | Samples | Pos 0.5s | Pos 1.0s | Pos 1.5s | Pos 2.0s | Pos Avg |
-|---|---:|---:|---:|---:|---:|---:|
-| Original soft-all weights | 2,246,939 | 0.138933 | 0.243327 | 0.364692 | 0.510625 | 0.260479 |
-| Top-2 retrained weights | 2,246,939 | 0.142280 | 0.249773 | 0.370602 | 0.517349 | 0.265333 |
-
-## Notes
-
-- Full data and checkpoints are intentionally not versioned. Place full data under `../data/` or pass explicit paths through CLI arguments.
-- The historical `evaluate_new.py` points to an older ablation model. For the latest Top-2 routing metrics, use `analyze_routing_topk.py` with `model/model_MoE_gru_new.py`.
-- `checkponint` is the original project spelling and is preserved for compatibility with existing scripts.
+```bash
+python evaluate_baseline.py \
+  --model hltp \
+  --checkpoint checkpoints/hltp_baseline/baseline_epoch21.tar \
+  --data ../data/test_data.npy \
+  --out outputs/hltp_baseline_test.csv
+```

@@ -179,8 +179,8 @@ def main():
     run_args["route_top_k"] = 2
 
     setting = default_setting(run_args)
-    run_args["path"] = cli.checkpoint_dir or os.path.join("checkponint", setting)
-    run_args["l_path"] = cli.result_dir or os.path.join("result", setting)
+    run_args["path"] = cli.checkpoint_dir or os.path.join("checkpoints", setting)
+    run_args["l_path"] = cli.result_dir or os.path.join("results", setting)
     os.makedirs(run_args["path"], exist_ok=True)
     os.makedirs(run_args["l_path"], exist_ok=True)
 

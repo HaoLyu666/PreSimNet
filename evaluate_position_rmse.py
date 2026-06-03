@@ -13,14 +13,14 @@ import model.model_MoE_gru_new as model
 
 
 CHECKPOINTS = {
-    "soft_all_original": (
-        "checkponint/"
-        "ed64_inl20_ol20_drop0.1_tl1_nh4_od2_gama0.9_qv1_nt2_gru_new_2/"
+    "presimnet_soft_all": (
+        "checkpoints/"
+        "presimnet_soft_all/"
         "epoch21_e.tar"
     ),
-    "top2_trained": (
-        "checkponint/"
-        "ed64_inl20_ol20_drop0.1_tl1_nh4_od2_gama0.9_qv1_nt2_gru_new_2-top2/"
+    "presimnet_top2": (
+        "checkpoints/"
+        "presimnet_top2/"
         "epoch21_e.tar"
     ),
 }
@@ -29,10 +29,10 @@ CHECKPOINTS = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate direct position prediction RMSE.")
     parser.add_argument("--data", default="../data/test_data.npy")
-    parser.add_argument("--batch-size", type=int, default=4096)
+    parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument("--out", default="fig/vis/position_rmse_compare.csv")
     parser.add_argument("--device", default="cuda:0" if t.cuda.is_available() else "cpu")
-    parser.add_argument("--drop-last", action="store_true")
+    parser.add_argument("--drop-last", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--max-batches", type=int, default=None)
     return parser.parse_args()
 

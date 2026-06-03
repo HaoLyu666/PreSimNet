@@ -22,6 +22,7 @@ checkpoints/
 runs/
 outputs/
 result/
+results/
 fig/
 long_term_predictions/
 long_term_predictions_2/
@@ -60,3 +61,45 @@ open-source/
 
 # Local automation wrapper with machine-specific paths
 run_loss_sensitivity_top2.ps1
+
+# Historical internal experiments kept locally but not released
+/analyze_routing_v2.py
+/create_bar_chart.py
+/DWA.py
+/abstract_weighting.py
+/evaluate.py
+/evaluate_gap_vis.py
+/evaluate_new.py
+/evaluate_new_pe.py
+/evaluate_param_distribution.py
+/evaluate_param_distribution2.py
+/extract_specific_trajectories.py
+/extract_trajectories.py
+/generate_color_ramps.py
+/long_term_prediction.py
+/loss_sensitivity_top2.py
+/physical_plausibility_top2.py
+/speed_stratified_eval.py
+/train.py
+/train_new.py
+/train_new_ab.py
+/train_new-pe.py
+/traj_plot.py
+/trajectory_vis.py
+/trajectory_visualization.py
+/visualize_mapping.py
+/visualize_trajectories.py
+/model/model_MoE_gru.py
+/model/model_MoE_gru_enhanced.py
+/model/model_MoE_gru_new_ab.py
+/model/model_MoE_gru_new_ablation.py
+/model/model_MoE_gru_new_pe.py
+/model/model_MoE_gru_new_pred.py
+/model/model_pip_baseline.py
+/module/mamba2_simple.py
+/module/ops/
+/mamba_ssm/
+/utils/
+/docs/reports/
+/docs/results/
+/docs/figures/top2_trained/

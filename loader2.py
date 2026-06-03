@@ -1,9 +1,7 @@
 from __future__ import print_function, division
 from torch.utils.data import Dataset
-import scipy.io as scp
 import numpy as np
 import torch
-from concurrent.futures import ThreadPoolExecutor
 
 '''
 0 数据集编号
@@ -54,5 +52,4 @@ class HighSimDataset(Dataset):
         return torch.tensor(hist, dtype=torch.float32), torch.tensor(next_v, dtype=torch.float32), torch.tensor(fut,
                                                                                                                 dtype=torch.float32), torch.tensor(
             cf_type, dtype=torch.float32)
-
 

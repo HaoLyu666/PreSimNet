@@ -65,8 +65,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--checkpoint",
         default=(
-            "checkponint/"
-            "ed64_inl20_ol20_drop0.1_tl1_nh4_od2_gama0.9_qv1_nt2_gru_new_2/"
+            "checkpoints/"
+            "presimnet_top2/"
             "epoch21_e.tar"
         ),
         help="Checkpoint path for the full PreSimNet model.",
@@ -78,10 +78,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--out-dir",
-        default="fig/vis/routing_analysis",
+        default="outputs/routing_analysis",
         help="Directory for figures and CSV files.",
     )
-    parser.add_argument("--batch-size", type=int, default=4096)
+    parser.add_argument("--batch-size", type=int, default=512)
     parser.add_argument(
         "--device",
         default="cuda:0" if t.cuda.is_available() else "cpu",
@@ -89,8 +89,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--drop-last",
-        action="store_true",
-        help="Drop the final incomplete batch, matching DataLoader(drop_last=True).",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Drop the final incomplete batch, matching the legacy evaluation scripts.",
     )
     parser.add_argument(
         "--max-batches",
